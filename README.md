@@ -18,12 +18,12 @@
 >"I-cure"
 >"E-cure"
 <br>
-##模型结构<br>
+## 模型结构
 采用bi-LSTM+CRF,此后会对模型进行优化,数据根据需求处理。<br>
 1.dataset文件夹 原始数据<br>
 2.LSTM_CRF.py 模型<br>
 3.data_util.py 数据处理<br>
 4.train.py main<br>
-##requirements<br>
+## requirements
 python 3<br>
 tensorflow 1.12
