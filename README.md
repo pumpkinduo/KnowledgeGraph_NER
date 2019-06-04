@@ -22,7 +22,7 @@
 1.dataset文件夹 原始数据<br>
 2.LSTM_CRF.py bi-LSTM模型<br>
 3.data_util.py 数据处理<br>
-4.train.py main
+4.train.py main<br>
 5.transformer_CRF transformer模型
 ## Requirements
 python 3<br>
