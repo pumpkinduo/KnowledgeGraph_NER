@@ -27,3 +27,5 @@
 ## Requirements
 python 3<br>
 tensorflow 1.12
+## 评价指标
+microF1 打分函数precision_recall_fscore_support
