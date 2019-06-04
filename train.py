@@ -1,17 +1,20 @@
 import tensorflow as tf
-from data_util import getBatches,get_data,get_sentence_int_to_vocab
-from LSTM_CRF import LSTM_CRFModel
+from data_util import getBatches,get_data,get_sentence_int_to_vocab,get_posint
+from transformer_CRF import LSTM_CRFModel
 from tqdm import tqdm
+
 import math
 import os
 import random
 
 tf.app.flags.DEFINE_integer("rnn_size",100,"Number of hidden units in each layer")
+tf.app.flags.DEFINE_integer("num_blocks",1,"Number of transformer block")
+tf.app.flags.DEFINE_integer("num_heads",8,"Number of attention head")
 tf.app.flags.DEFINE_integer("batch_size",30,"Batch Size")
-tf.app.flags.DEFINE_integer("embedding_size",300,"Embedding dimensions of encoder and decoder inputs")
-tf.app.flags.DEFINE_float("learning_rate",0.001,"Learning rate")
+tf.app.flags.DEFINE_integer("embedding_size",100,"Embedding dimensions of encoder and decoder inputs")
+tf.app.flags.DEFINE_float("learning_rate",0.01,"Learning rate")
 tf.app.flags.DEFINE_float("keep_prob",0.5,"keep_prob")
-tf.app.flags.DEFINE_integer("numEpochs",10,"Maximum # of training epochs")
+tf.app.flags.DEFINE_integer("numEpochs",30,"Maximum # of training epochs")
 tf.app.flags.DEFINE_string("model_dir","saves/","Path to save model checkpoints")
 tf.app.flags.DEFINE_string("model_name","ner.ckpt","File name used for model checkpoints")
 
@@ -21,14 +24,15 @@ FLAGS = tf.app.flags.FLAGS
 train_datapath = "dataset/train.txt"
 test_datapath = "dataset/test.txt"
 sentence_int_to_vocab, sentence_vocab_to_int, tags_vocab_to_int, tags_int_to_vocab = get_sentence_int_to_vocab(train_datapath,test_datapath)
+pos_vocab_to_int,pos_int_to_vocab = get_posint()
 data = get_data(train_datapath)
 train_data = data
 vali_data = get_data(test_datapath)
 
 
 with tf.Session() as sess:
-    model = LSTM_CRFModel(FLAGS.rnn_size,FLAGS.embedding_size,FLAGS.learning_rate,
-                          sentence_vocab_to_int,tags_vocab_to_int,tags_int_to_vocab,FLAGS.keep_prob)
+    model = LSTM_CRFModel(FLAGS.num_heads,FLAGS.num_blocks,FLAGS.rnn_size,FLAGS.embedding_size,FLAGS.learning_rate,
+                          sentence_vocab_to_int,tags_vocab_to_int,tags_int_to_vocab,pos_vocab_to_int,FLAGS.keep_prob)
     ckpt = tf.train.get_checkpoint_state(FLAGS.model_dir)
 
     if ckpt and tf.train.checkpoint_exists(ckpt.model_checkpoint_path):
@@ -42,7 +46,7 @@ with tf.Session() as sess:
     current_step = 0
     avef1list = []
     micf1list = []
-    train_summary_writer = tf.summary.FileWriter("save/train", graph=sess.graph)
+    train_summary_writer = tf.summary.FileWriter("saves/train", graph=sess.graph)
 
 
     for e in range(FLAGS.numEpochs):
